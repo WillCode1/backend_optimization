@@ -13,7 +13,7 @@
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include "pgo/Backend.hpp"
-#include "backend_optimization/msg/BackendOpt.hpp"
+#include "slam_interfaces/srv/backend_opt.hpp"
 // #include "ParametersRos2.h"
 
 FILE *location_log = nullptr;
@@ -235,6 +235,55 @@ void initialPoseCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::Sh
     init_pose.pitch = rpy.y();
     init_pose.yaw = rpy.z();
     backend.relocalization->set_init_pose(init_pose);
+}
+
+bool pgo_callback(const slam_interfaces::srv::BackendOpt::Request::SharedPtr request, slam_interfaces::srv::BackendOpt::Response::SharedPtr response)
+{
+    PointXYZIRPYT this_pose6d;
+    PointCloudType::Ptr feats_undistort(new PointCloudType());
+    PointCloudType::Ptr submap_fix(new PointCloudType());
+
+    this_pose6d.x = request->pose[0];
+    this_pose6d.y = request->pose[1];
+    this_pose6d.z = request->pose[2];
+    this_pose6d.roll = request->pose[3];
+    this_pose6d.pitch = request->pose[4];
+    this_pose6d.yaw = request->pose[5];
+    this_pose6d.time = request->pose[6];
+    publish_odometry(pubOdomAftMapped, this_pose6d, this_pose6d.time);
+
+    pcl::fromROSMsg(request->cloud_undistort, *feats_undistort);
+    backend.run(this_pose6d, feats_undistort, submap_fix);
+    if (submap_fix->size())
+    {
+        response->pose_fix.emplace_back(this_pose6d.x);
+        response->pose_fix.emplace_back(this_pose6d.y);
+        response->pose_fix.emplace_back(this_pose6d.z);
+        response->pose_fix.emplace_back(this_pose6d.roll);
+        response->pose_fix.emplace_back(this_pose6d.pitch);
+        response->pose_fix.emplace_back(this_pose6d.yaw);
+        response->pose_fix.emplace_back(this_pose6d.time);
+        pcl::toROSMsg(*submap_fix, response->submap_fix);
+    }
+
+    lidar_end_time = this_pose6d.time;
+
+    /******* Publish odometry *******/
+    publish_odometry(pubOdomNotFix, this_pose6d, this_pose6d.time, false);
+
+    /******* Publish points *******/
+    if (path_en)
+    {
+        publish_lidar_keyframe_trajectory(pubLidarPath, *backend.keyframe_pose6d_optimized, this_pose6d.time);
+    }
+    if (scan_pub_en)
+        if (dense_pub_en)
+            publish_cloud_world(pubLaserCloudFull, feats_undistort, this_pose6d, this_pose6d.time);
+        // else
+        //     publish_cloud(pubLaserCloudFull, frontend.feats_down_world, this_pose6d.time, map_frame);
+
+    visualize_loop_closure_constraints(pubLoopConstraintEdge, this_pose6d.time, backend.loopClosure->loop_constraint_records, backend.loopClosure->copy_keyframe_pose6d);
+    return true;
 }
 
 int main(int argc, char **argv)

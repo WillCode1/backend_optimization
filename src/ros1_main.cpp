@@ -234,7 +234,7 @@ void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPt
     backend.relocalization->set_init_pose(init_pose);
 }
 
-bool pgo_callback(slam_interfaces::BackendOptRequest &request, slam_interfaces::BackendOptResponse &response)
+bool pgo_callback(const slam_interfaces::BackendOptRequest &request, slam_interfaces::BackendOptResponse &response)
 {
     PointXYZIRPYT this_pose6d;
     PointCloudType::Ptr feats_undistort(new PointCloudType());
