@@ -285,7 +285,7 @@ bool pgo_callback(backend_optimization::BackendOptRequest &request, backend_opti
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "SLAM");
+    ros::init(argc, argv, "backend_optimization");
     ros::NodeHandle nh;
     string gnss_topic;
 

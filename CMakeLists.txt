@@ -150,13 +150,13 @@ else(ROS_EDITION STREQUAL "ROS2")
   #   src/map_stitch.cpp)
   # target_link_libraries(map_stitch stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
 
-  add_executable(pgo_service src/pgo_service_ros2.cpp
+  add_executable(pgo src/ros2_main.cpp
     include/global_localization/scancontext/Scancontext.cpp
     include/pgo/Backend.hpp)
-  target_link_libraries(pgo_service stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
-  ament_target_dependencies(pgo_service rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros)
+  target_link_libraries(pgo stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
+  ament_target_dependencies(pgo rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros)
 
-  install(TARGETS pgo_service
+  install(TARGETS pgo
     DESTINATION lib/${PROJECT_NAME}
   )
   install(DIRECTORY launch config rviz_cfg
