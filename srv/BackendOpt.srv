@@ -1,0 +1,3 @@
+int32 num_points
+---
+sensor_msgs/PointCloud2 point_cloud
