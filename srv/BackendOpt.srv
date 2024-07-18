@@ -1,5 +1,0 @@
-float32[] pose
-sensor_msgs/PointCloud2 cloud_undistort
----
-float32[] pose_fix
-sensor_msgs/PointCloud2 submap_fix

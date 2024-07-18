@@ -73,22 +73,6 @@ if(ROS_EDITION STREQUAL "ROS1")
     ${GTSAM_INCLUDE_DIR}
     include)
 
-  # add_message_files(
-  #   DIRECTORY msg
-  #   FILES
-  # )
-
-  add_service_files(
-    FILES
-    BackendOpt.srv
-  )
-
-  generate_messages(
-    DEPENDENCIES
-    std_msgs
-    sensor_msgs
-  )
-
   catkin_package()
 
   add_library(${PROJECT_NAME} SHARED
@@ -140,11 +124,6 @@ else(ROS_EDITION STREQUAL "ROS2")
     ament_lint_auto_find_test_dependencies()
   endif()
 
-  rosidl_generate_interfaces(${PROJECT_NAME}
-    "srv/BackendOpt.srv"                    
-    DEPENDENCIES builtin_interfaces std_msgs sensor_msgs
-  )
-
   ament_package()
 
   # add_executable(map_stitch 
@@ -156,7 +135,7 @@ else(ROS_EDITION STREQUAL "ROS2")
     include/global_localization/scancontext/Scancontext.cpp
     include/pgo/Backend.hpp)
   target_link_libraries(pgo stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
-  ament_target_dependencies(pgo rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros)
+  ament_target_dependencies(pgo rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros slam_interfaces)
 
   install(TARGETS pgo
     DESTINATION lib/${PROJECT_NAME}

@@ -15,7 +15,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include "pgo/Backend.hpp"
-#include "backend_optimization/BackendOpt.h"
+#include "slam_interfaces/BackendOpt.h"
 #include "ParametersRos1.h"
 
 FILE *location_log = nullptr;
@@ -234,7 +234,7 @@ void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPt
     backend.relocalization->set_init_pose(init_pose);
 }
 
-bool pgo_callback(backend_optimization::BackendOptRequest &request, backend_optimization::BackendOptResponse &response)
+bool pgo_callback(slam_interfaces::BackendOptRequest &request, slam_interfaces::BackendOptResponse &response)
 {
     PointXYZIRPYT this_pose6d;
     PointCloudType::Ptr feats_undistort(new PointCloudType());
