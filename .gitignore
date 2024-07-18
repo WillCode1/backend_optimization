@@ -1,0 +1,11 @@
+.vscode/*
+**/build
+**/Log/*.png
+**/Log/*.txt
+**/Log/*.csv
+**/Log/*.pdf
+**/Log/*.log
+**/*.pcd
+**/*.scd
+**/PCD/*.txt
+**/PCD/*.fg
