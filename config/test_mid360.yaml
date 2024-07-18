@@ -1,34 +1,9 @@
 common:
-    lidar_topic:  "/livox/lidar"
-    imu_topic:  "/livox/imu"
     gnss_topic:  "/gps/fix"
     map_frame:  "map"
-    body_frame:  "body"
-    timedelay_lidar2imu: 0.0 # Time offset between lidar and IMU calibrated by other algorithms, e.g. LI-Init (can be found in README).
-
-preprocess:
-    lidar_type: 1                # 1 for Livox serials LiDAR, 2 for Velodyne LiDAR, 3 for ouster LiDAR, 
-    scan_line: 6
-    blind: 1                  # 0~0.1: blind, 0.1~0.2: distortion
-    det_range: 70.0
+    lidar_frame:  "lidar"
 
 mapping:
-    gravity_align: true                 # true to align the z axis of world frame with the direction of gravity, and the gravity direction should be specified below
-    gravity_init: [0, 0, -9.81]         # gravity to be aligned
-    eular_init: [0, 0, 0]             # imu init rotation, for fix imu measure
-    frontend_type: 0                    # frontend type
-
-    # fastlio
-    point_skip_num: 4
-    space_down_sample: false
-    surf_frame_ds_res: 0.1
-    max_iteration: 3
-    ikdtree_resolution: 0.1
-    lidar_model_search_range: 0.5
-    lidar_meas_cov: 0.001
-    cube_side_length: 200
-    runtime_log_enable: 0
-
     # for backend
     keyframe_add_dist_threshold: 1
     keyframe_add_angle_threshold: 0.2
@@ -54,11 +29,6 @@ mapping:
     odom_loop_vaild_period: []
     scancontext_loop_vaild_period: [0, 1]
 
-    acc_cov: 0.1
-    gyr_cov: 0.1
-    b_acc_cov: 0.0001
-    b_gyr_cov: 0.0001
-    extrinsic_est_en:  false      # true: enable the online estimation of IMU-LiDAR extrinsic
     # lidar -> imu
     extrinsic_T: [ -0.011, -0.02329, 0.04412 ]
     extrinsic_R: [ 1, 0, 0,
@@ -80,8 +50,13 @@ publish:
     dense_publish_en: true       # false: low down the points number in a global-frame point clouds scan.
 
 official:
-    ground_constraint_enable: false
     save_globalmap_en: true
     save_resolution: 0.2
     save_keyframe_en: false
     save_keyframe_descriptor_en: false
+    map_path: "/home/will/tmp/"
+
+    save_pgm: true
+    pgm_resolution: 0.05
+    min_z: -0.5
+    max_z: 0.2

@@ -16,7 +16,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include "pgo/Backend.hpp"
 #include "backend_optimization/BackendOpt.h"
-// #include "ParametersRos1.h"
+#include "ParametersRos1.h"
 
 FILE *location_log = nullptr;
 bool showOptimizedPose = true;
@@ -33,7 +33,6 @@ ros::Publisher pubLidarPath;
 ros::Publisher pubOdomNotFix;
 ros::Publisher pubLoopConstraintEdge;
 std::string map_frame;
-std::string body_frame;
 std::string lidar_frame;
 
 bool flg_exit = false;
@@ -108,7 +107,7 @@ void publish_odometry(const ros::Publisher &pubOdomAftMapped, const PointXYZIRPY
 {
     nav_msgs::Odometry odomAftMapped;
     odomAftMapped.header.frame_id = map_frame;
-    odomAftMapped.child_frame_id = body_frame;
+    odomAftMapped.child_frame_id = lidar_frame;
     odomAftMapped.header.stamp = ros::Time().fromSec(lidar_end_time);
     const QD &lidar_rot = EigenMath::RPY2Quaternion(V3D(state.roll, state.pitch, state.yaw));
     const V3D &lidar_pos = V3D(state.x, state.y, state.z);
@@ -288,9 +287,9 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "SLAM");
     ros::NodeHandle nh;
-    bool save_globalmap_en = false;
     string gnss_topic;
 
+    bool save_globalmap_en = false;
     bool save_pgm = false;
     double pgm_resolution;
     float min_z, max_z;
@@ -301,9 +300,9 @@ int main(int argc, char **argv)
     ros::param::param("globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity, 10.);
     ros::param::param("globalMapVisualizationLeafSize", globalMapVisualizationLeafSize, 1.);
 
-    // load_ros_parameters(path_en, scan_pub_en, dense_pub_en, lidar_topic, imu_topic, gnss_topic, map_frame, body_frame, lidar_frame);
-    // load_parameters(backend, save_globalmap_en);
-    // load_pgm_parameters(save_pgm, pgm_resolution, min_z, max_z);
+    load_ros_parameters(path_en, scan_pub_en, dense_pub_en, gnss_topic, map_frame, lidar_frame);
+    load_parameters(backend);
+    load_pgm_parameters(save_globalmap_en, save_pgm, pgm_resolution, min_z, max_z);
 
     /*** ROS subscribe initialization ***/
 #ifdef UrbanLoco
