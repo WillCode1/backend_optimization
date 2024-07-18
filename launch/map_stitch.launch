@@ -3,15 +3,15 @@
 
 	<arg name="rviz" default="true" />
 
-    <rosparam file="$(find fast_lio_sam)/config/map_stitch.yaml" command="load" />
+    <rosparam file="$(find backend_optimization)/config/map_stitch.yaml" command="load" />
 
 	<param name="globalMapVisualizationPoseDensity" type="double" value="3" />
 	<param name="globalMapVisualizationLeafSize" type="double" value="0.2" />
 
-    <node pkg="fast_lio_sam" type="map_stitch" name="system" output="screen" /> 
+    <node pkg="backend_optimization" type="map_stitch" name="system" output="screen" /> 
 
 	<group if="$(arg rviz)">
-		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find fast_lio_sam)/rviz_cfg/map_stitch.rviz" />
+		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find backend_optimization)/rviz_cfg/map_stitch.rviz" />
 	</group>
 
 </launch>

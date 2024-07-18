@@ -100,8 +100,11 @@ if(ROS_EDITION STREQUAL "ROS1")
     src/map_stitch.cpp)
   target_link_libraries(map_stitch stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam ${catkin_LIBRARIES})
 
-  add_executable(pgo_service src/pgo_service_ros1.cpp)
-  target_link_libraries(pgo_service ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+  # add_executable(pgo_service src/pgo_service_ros1.cpp)
+  # target_link_libraries(pgo_service ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+  add_executable(pgo src/ros1_main.cpp)
+  target_link_libraries(pgo ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 else(ROS_EDITION STREQUAL "ROS2")
   if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
