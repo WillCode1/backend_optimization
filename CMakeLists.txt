@@ -62,6 +62,7 @@ if(ROS_EDITION STREQUAL "ROS1")
     pcl_ros
     tf
     eigen_conversions
+    slam_interfaces
   )
 
   include_directories(
@@ -119,6 +120,7 @@ else(ROS_EDITION STREQUAL "ROS2")
   find_package(sensor_msgs REQUIRED)
   find_package(visualization_msgs REQUIRED)
   find_package(tf2_ros REQUIRED)
+  find_package(slam_interfaces REQUIRED)
 
   include_directories(
     ${EIGEN3_INCLUDE_DIR}
