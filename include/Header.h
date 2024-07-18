@@ -290,15 +290,14 @@ inline void pointLidarToWorld(PointType const &pi, PointType &po, const QD &lida
     po.intensity = pi.intensity;
 }
 
-template <typename ikfom_state>
-void pointcloudLidarToWorld(const PointCloudType::Ptr cloud_in, PointCloudType::Ptr cloud_out, const ikfom_state &state)
+inline void pointcloudLidarToWorld(const PointCloudType::Ptr cloud_in, PointCloudType::Ptr cloud_out, const PointXYZIRPYT &pose)
 {
     auto cloud_num = cloud_in->points.size();
     cloud_out->resize(cloud_num);
 
     // imu pose -> lidar pose
-    QD lidar_rot = state.rot * state.offset_R_L_I;
-    V3D lidar_pos = state.rot * state.offset_T_L_I + state.pos;
+    const QD &lidar_rot = EigenMath::RPY2Quaternion(V3D(pose.roll, pose.pitch, pose.yaw));
+    const V3D &lidar_pos = V3D(pose.x, pose.y, pose.z);
 
 #pragma omp parallel for num_threads(MP_PROC_NUM)
     for (int i = 0; i < cloud_num; i++)
@@ -313,18 +312,13 @@ inline PointCloudType::Ptr pointcloudKeyframeToWorld(const PointCloudType::Ptr &
     PointCloudType::Ptr cloud_out(new PointCloudType(cloudSize, 1));
     cloud_out->resize(cloudSize);
 
-    const QD &state_rot = EigenMath::RPY2Quaternion(V3D(pose.roll, pose.pitch, pose.yaw));
-    const V3D &state_pos = V3D(pose.x, pose.y, pose.z);
+    const QD &lidar_rot = EigenMath::RPY2Quaternion(V3D(pose.roll, pose.pitch, pose.yaw));
+    const V3D &lidar_pos = V3D(pose.x, pose.y, pose.z);
 
 #pragma omp parallel for num_threads(MP_PROC_NUM)
     for (int i = 0; i < cloudSize; ++i)
     {
-        V3D p_lidar(cloud_in->points[i].x, cloud_in->points[i].y, cloud_in->points[i].z);
-        V3D p_global(state_rot.normalized() * p_lidar + state_pos);
-        cloud_out->points[i].x = p_global(0);
-        cloud_out->points[i].y = p_global(1);
-        cloud_out->points[i].z = p_global(2);
-        cloud_out->points[i].intensity = cloud_in->points[i].intensity;
+        pointLidarToWorld(cloud_in->points[i], cloud_out->points[i], lidar_rot, lidar_pos);
     }
     return cloud_out;
 }

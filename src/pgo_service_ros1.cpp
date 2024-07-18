@@ -41,5 +41,6 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::ServiceServer server = nh.advertiseService("pgo_service", pgo_callback);
     ROS_INFO("pgo service ready!");
+    ros::spin();
     return 0;
 }

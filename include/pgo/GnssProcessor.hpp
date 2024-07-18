@@ -29,13 +29,6 @@ public:
   GnssProcessor()
   {
     extrinsic_lidar2gnss.setIdentity();
-    file_pose_gnss = fopen(DEBUG_FILE_DIR("gnss_pose.txt").c_str(), "w");
-    fprintf(file_pose_gnss, "# gnss trajectory\n# timestamp tx ty tz qx qy qz qw\n");
-  }
-
-  ~GnssProcessor()
-  {
-    fclose(file_pose_gnss);
   }
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -55,9 +48,6 @@ public:
 
 private:
   bool check_mean_and_variance(const std::vector<V3D> &start_point, utm_coordinate::utm_point &utm_origin, const double &variance_thold);
-
-private:
-  FILE *file_pose_gnss;
 };
 
 void GnssProcessor::set_extrinsic(const V3D &transl, const M3D &rot)
@@ -147,7 +137,7 @@ void GnssProcessor::gnss_handler(const GnssPose &gnss_raw)
   GnssPose utm_pose = gnss_raw;
   utm_pose.gnss_position = V3D(utm.east - utm_origin.east, utm.north - utm_origin.north, utm.up - utm_origin.up);
   gnss_buffer.push_back(utm_pose);
-  LogAnalysis::save_trajectory(file_pose_gnss, utm_pose.gnss_position, utm_pose.gnss_quat, utm_pose.timestamp);
+  // LogAnalysis::save_trajectory(file_pose_gnss, utm_pose.gnss_position, utm_pose.gnss_quat, utm_pose.timestamp);
 }
 
 bool GnssProcessor::get_gnss_factor(GnssPose &thisGPS, const double &lidar_end_time, const double &odom_z)
