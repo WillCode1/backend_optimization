@@ -323,8 +323,10 @@ int main(int argc, char **argv)
     auto pubGlobalmap = node->create_publisher<sensor_msgs::msg::PointCloud2>("/map_global", 1);
     std::thread visualizeMapThread = std::thread(&visualize_globalmap_thread, pubGlobalmap);
     auto sub_initpose = node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 1, initialPoseCallback);
-
     broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(node);
+    auto service = node->create_service<slam_interfaces::srv::BackendOpt>("/pgo_service", &pgo_callback);
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "pgo service ready!");
+
     //------------------------------------------------------------------------------------------------------
     signal(SIGINT, SigHandle);
     rclcpp::Rate rate(5000);

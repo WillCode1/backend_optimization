@@ -320,7 +320,7 @@ int main(int argc, char **argv)
     ros::Publisher pubGlobalmap = nh.advertise<sensor_msgs::PointCloud2>("/map_global", 1);
     std::thread visualizeMapThread = std::thread(&visualize_globalmap_thread, pubGlobalmap);
     ros::Subscriber sub_initpose = nh.subscribe("/initialpose", 1, initialPoseCallback);
-    ros::ServiceServer server = nh.advertiseService("pgo_service", pgo_callback);
+    ros::ServiceServer server = nh.advertiseService("/pgo_service", pgo_callback);
     ROS_WARN("pgo service ready!");
 
     //------------------------------------------------------------------------------------------------------
