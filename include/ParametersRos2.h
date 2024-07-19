@@ -3,8 +3,7 @@
 #include "pgo/Backend.hpp"
 
 inline void load_ros_parameters(rclcpp::Node::SharedPtr &node, bool &path_en, bool &scan_pub_en, bool &dense_pub_en,
-                                std::string &lidar_topic, std::string &imu_topic, std::string &gnss_topic,
-                                std::string &map_frame, std::string &body_frame, std::string &lidar_frame)
+                                std::string &gnss_topic, std::string &map_frame, std::string &lidar_frame)
 {
     node->declare_parameter("path_en", false);
     node->declare_parameter("scan_publish_en", false);
@@ -23,15 +22,12 @@ inline void load_ros_parameters(rclcpp::Node::SharedPtr &node, bool &path_en, bo
     node->get_parameter("lidar_frame", lidar_frame);
 }
 
-inline void load_parameters(rclcpp::Node::SharedPtr &node, Backend &backend, bool &save_globalmap_en, int &lidar_type)
+inline void load_parameters(rclcpp::Node::SharedPtr &node, Backend &backend)
 {
-    double blind, detect_range;
-    int n_scans, scan_rate, time_unit;
     vector<double> extrinT;
     vector<double> extrinR;
     V3D extrinT_eigen;
     M3D extrinR_eigen;
-    double gyr_cov, acc_cov, b_gyr_cov, b_acc_cov;
 
     node->declare_parameter("keyframe_add_dist_threshold", 1.f);
     node->declare_parameter("keyframe_add_angle_threshold", 0.2f);
@@ -55,7 +51,6 @@ inline void load_parameters(rclcpp::Node::SharedPtr &node, Backend &backend, boo
     node->declare_parameter("manually_loop_vaild_period", vector<double>());
     node->declare_parameter("odom_loop_vaild_period", vector<double>());
     node->declare_parameter("scancontext_loop_vaild_period", vector<double>());
-    node->declare_parameter("save_globalmap_en", true);
     node->declare_parameter("save_keyframe_en", true);
     node->declare_parameter("save_keyframe_descriptor_en", true);
     node->declare_parameter("save_resolution", 0.1f);
@@ -92,7 +87,6 @@ inline void load_parameters(rclcpp::Node::SharedPtr &node, Backend &backend, boo
     node->get_parameter("odom_loop_vaild_period", backend.loopClosure->loop_vaild_period["odom"]);
     node->get_parameter("scancontext_loop_vaild_period", backend.loopClosure->loop_vaild_period["scancontext"]);
 
-    node->get_parameter("save_globalmap_en", save_globalmap_en);
     node->get_parameter("save_keyframe_en", backend.save_keyframe_en);
     node->get_parameter("save_keyframe_descriptor_en", backend.save_keyframe_descriptor_en);
     node->get_parameter("save_resolution", backend.save_resolution);
@@ -206,13 +200,15 @@ inline void load_parameters(rclcpp::Node::SharedPtr &node, Backend &backend, boo
     backend.init_system_mode();
 }
 
-inline void load_pgm_parameters(rclcpp::Node::SharedPtr &node, bool &save_pgm, double &pgm_resolution, float &min_z, float &max_z)
+inline void load_pgm_parameters(rclcpp::Node::SharedPtr &node, bool &save_globalmap_en, bool &save_pgm, double &pgm_resolution, float &min_z, float &max_z)
 {
+    node->declare_parameter("save_globalmap_en", true);
     node->declare_parameter("save_pgm", false);
     node->declare_parameter("pgm_resolution", 0.05);
     node->declare_parameter("min_z", -1.5f);
     node->declare_parameter("max_z", 0.1f);
 
+    node->get_parameter("save_globalmap_en", save_globalmap_en);
     node->get_parameter("save_pgm", save_pgm);
     node->get_parameter("pgm_resolution", pgm_resolution);
     node->get_parameter("min_z", min_z);

@@ -14,7 +14,7 @@
 #include <visualization_msgs/msg/marker_array.hpp>
 #include "pgo/Backend.hpp"
 #include "slam_interfaces/srv/backend_opt.hpp"
-// #include "ParametersRos2.h"
+#include "ParametersRos2.h"
 
 FILE *location_log = nullptr;
 bool showOptimizedPose = true;
@@ -30,6 +30,7 @@ rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdomAftMapped;
 rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubLidarPath;
 rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdomNotFix;
 rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pubLoopConstraintEdge;
+std::shared_ptr<tf2_ros::TransformBroadcaster> broadcaster;
 std::string map_frame;
 std::string lidar_frame;
 
@@ -87,7 +88,7 @@ void set_posestamp(T &out, const QD &rot, const V3D &pos)
     out.pose.orientation.w = rot.coeffs()[3];
 }
 
-void publish_tf(tf2_ros::TransformBroadcaster &broadcaster, const geometry_msgs::msg::Pose &pose, const double &lidar_end_time)
+void publish_tf(const geometry_msgs::msg::Pose &pose, const double &lidar_end_time)
 {
     geometry_msgs::msg::TransformStamped transform_stamped;
     transform_stamped.header.stamp = rclcpp::Time(lidar_end_time * 1e9);
@@ -101,11 +102,11 @@ void publish_tf(tf2_ros::TransformBroadcaster &broadcaster, const geometry_msgs:
     transform_stamped.transform.rotation.y = pose.orientation.y;
     transform_stamped.transform.rotation.z = pose.orientation.z;
     transform_stamped.transform.rotation.w = pose.orientation.w;
-    broadcaster.sendTransform(transform_stamped);
+    broadcaster->sendTransform(transform_stamped);
 }
 
 // 发布里程计
-void publish_odometry(rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr &pubOdomAftMapped, tf2_ros::TransformBroadcaster &broadcaster,
+void publish_odometry(rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr &pubOdomAftMapped,
                       const PointXYZIRPYT &state, const double &lidar_end_time, bool need_publish_tf = true)
 {
     nav_msgs::msg::Odometry odomAftMapped;
@@ -117,7 +118,7 @@ void publish_odometry(rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr &pub
     set_posestamp(odomAftMapped.pose, lidar_rot, lidar_pos);
     pubOdomAftMapped->publish(odomAftMapped);
     if (need_publish_tf)
-        publish_tf(broadcaster, odomAftMapped.pose.pose, lidar_end_time);
+        publish_tf(odomAftMapped.pose.pose, lidar_end_time);
 }
 
 void publish_lidar_keyframe_trajectory(rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr &pubPath, const pcl::PointCloud<PointXYZIRPYT> &trajectory, const double &lidar_end_time)
@@ -307,9 +308,9 @@ int main(int argc, char **argv)
     node->get_parameter("globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity);
     node->get_parameter("globalMapVisualizationLeafSize", globalMapVisualizationLeafSize);
 
-    // load_ros_parameters(node, path_en, scan_pub_en, dense_pub_en, gnss_topic, map_frame, lidar_frame);
-    // load_parameters(node, backend);
-    // load_pgm_parameters(node, save_globalmap_en, save_pgm, pgm_resolution, min_z, max_z);
+    load_ros_parameters(node, path_en, scan_pub_en, dense_pub_en, gnss_topic, map_frame, lidar_frame);
+    load_parameters(node, backend);
+    load_pgm_parameters(node, save_globalmap_en, save_pgm, pgm_resolution, min_z, max_z);
 
     /*** ROS subscribe initialization ***/
     // 发布当前正在扫描的点云，topic名字为/cloud_registered
@@ -323,7 +324,7 @@ int main(int argc, char **argv)
     std::thread visualizeMapThread = std::thread(&visualize_globalmap_thread, pubGlobalmap);
     auto sub_initpose = node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 1, initialPoseCallback);
 
-    tf2_ros::TransformBroadcaster broadcaster(node);
+    broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(node);
     //------------------------------------------------------------------------------------------------------
     signal(SIGINT, SigHandle);
     rclcpp::Rate rate(5000);
@@ -332,42 +333,6 @@ int main(int argc, char **argv)
         if (flg_exit)
             break;
         rclcpp::spin_some(node);
-
-        if (!frontend.sync_sensor_data())
-            continue;
-
-        PointCloudType::Ptr feats_undistort(new PointCloudType());
-        PointCloudType::Ptr submap_fix(new PointCloudType());
-        PointXYZIRPYT this_pose6d;
-        if (frontend.run(feats_undistort))
-        {
-            auto state = frontend.get_state();
-            state2pose(this_pose6d, frontend.lidar_end_time, state);
-            backend.run(this_pose6d, feats_undistort, submap_fix);
-            if (submap_fix->size())
-            {
-                pose2state(this_pose6d, state);
-                frontend.set_pose(state);
-                frontend.ikdtree.reconstruct(submap_fix->points);
-            }
-            /******* Publish odometry *******/
-            publish_odometry(pubOdomAftMapped, broadcaster, state, frontend.lidar_end_time);
-            // publish_odometry(pubOdomNotFix, broadcaster, frontend.state_not_fix, frontend.lidar_end_time, false);
-
-            /******* Publish points *******/
-            if (path_en)
-            {
-                publish_lidar_keyframe_trajectory(pubLidarPath, *backend.keyframe_pose6d_optimized, frontend.lidar_end_time);
-            }
-            if (scan_pub_en)
-                if (dense_pub_en)
-                    publish_cloud_world(pubLaserCloudFull, feats_undistort, state, frontend.lidar_end_time);
-                else
-                    publish_cloud_world(pubLaserCloudFull, frontend.feats_down_lidar, state, frontend.lidar_end_time);
-
-            visualize_loop_closure_constraints(pubLoopConstraintEdge, frontend.lidar_end_time, backend.loopClosure->loop_constraint_records, backend.loopClosure->copy_keyframe_pose6d);
-        }
-
         rate.sleep();
     }
 
