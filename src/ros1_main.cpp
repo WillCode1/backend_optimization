@@ -246,7 +246,7 @@ bool pgo_callback(slam_interfaces::BackendOptRequest &request, slam_interfaces::
     this_pose6d.roll = request.pose[3];
     this_pose6d.pitch = request.pose[4];
     this_pose6d.yaw = request.pose[5];
-    this_pose6d.time = request.pose[6];
+    this_pose6d.time = request.timestamp;
     publish_odometry(pubOdomAftMapped, this_pose6d, this_pose6d.time);
 
     pcl::fromROSMsg(request.cloud_undistort, *feats_undistort);
@@ -259,7 +259,6 @@ bool pgo_callback(slam_interfaces::BackendOptRequest &request, slam_interfaces::
         response.pose_fix.emplace_back(this_pose6d.roll);
         response.pose_fix.emplace_back(this_pose6d.pitch);
         response.pose_fix.emplace_back(this_pose6d.yaw);
-        response.pose_fix.emplace_back(this_pose6d.time);
         pcl::toROSMsg(*submap_fix, response.submap_fix);
     }
 
