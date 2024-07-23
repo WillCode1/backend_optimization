@@ -4,8 +4,10 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/registration/gicp.h>
 #include "Header.h"
-#include "utility/manually_correct_loop_closure.h"
 #include "global_localization/scancontext/Scancontext.h"
+#if 0
+#include "utility/manually_correct_loop_closure.h"
+#endif
 
 class LoopClosure
 {
@@ -99,11 +101,13 @@ public:
         correctionLidarFrame = gicp.getFinalTransformation();
         float noiseScore = gicp.getFitnessScore();
 
+#if 0
         if (is_vaild_loop_time_period(dartion_time, loop_vaild_period["manually"]))
         {
             pcl::getTranslationAndEulerAngles(correctionLidarFrame, trans_state[0], trans_state[1], trans_state[2], trans_state[3], trans_state[4], trans_state[5]);
             noiseScore = manually_adjust_loop_closure(ref_near_keyframe_cloud, cur_keyframe_cloud, correctionLidarFrame);
         }
+#endif
 
         // Get current frame wrong pose
         Eigen::Affine3f tWrong = pclPointToAffine3f(copy_keyframe_pose6d->points[loop_key_cur]);
