@@ -6,9 +6,6 @@
 #include "FactorGraphOptimization.hpp"
 #include "global_localization/Relocalization.hpp"
 #include "LoopClosure.hpp"
-#if 0
-#include "utility/manually_correct_loop_closure.h"
-#endif
 
 class MapStitch
 {
