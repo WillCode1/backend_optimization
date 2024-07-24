@@ -13,7 +13,7 @@
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include "pgo/Backend.hpp"
-#include "slam_interfaces/srv/backend_opt.hpp"
+// #include "slam_interfaces/srv/backend_opt.hpp"
 #include "ParametersRos2.h"
 
 FILE *location_log = nullptr;
@@ -238,34 +238,11 @@ void initialPoseCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::Sh
     backend.relocalization->set_init_pose(init_pose);
 }
 
-bool pgo_callback(const slam_interfaces::srv::BackendOpt::Request::SharedPtr request, slam_interfaces::srv::BackendOpt::Response::SharedPtr response)
+bool pgo_callback(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort, PointCloudType::Ptr &submap_fix)
 {
-    PointXYZIRPYT this_pose6d;
-    PointCloudType::Ptr feats_undistort(new PointCloudType());
-    PointCloudType::Ptr submap_fix(new PointCloudType());
-
-    this_pose6d.x = request->pose[0];
-    this_pose6d.y = request->pose[1];
-    this_pose6d.z = request->pose[2];
-    this_pose6d.roll = request->pose[3];
-    this_pose6d.pitch = request->pose[4];
-    this_pose6d.yaw = request->pose[5];
-    this_pose6d.time = request->pose[6];
     publish_odometry(pubOdomAftMapped, this_pose6d, this_pose6d.time);
 
-    pcl::fromROSMsg(request->cloud_undistort, *feats_undistort);
     backend.run(this_pose6d, feats_undistort, submap_fix);
-    if (submap_fix->size())
-    {
-        response->pose_fix.emplace_back(this_pose6d.x);
-        response->pose_fix.emplace_back(this_pose6d.y);
-        response->pose_fix.emplace_back(this_pose6d.z);
-        response->pose_fix.emplace_back(this_pose6d.roll);
-        response->pose_fix.emplace_back(this_pose6d.pitch);
-        response->pose_fix.emplace_back(this_pose6d.yaw);
-        response->pose_fix.emplace_back(this_pose6d.time);
-        pcl::toROSMsg(*submap_fix, response->submap_fix);
-    }
 
     lidar_end_time = this_pose6d.time;
 
@@ -324,7 +301,6 @@ int main(int argc, char **argv)
     std::thread visualizeMapThread = std::thread(&visualize_globalmap_thread, pubGlobalmap);
     auto sub_initpose = node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/initialpose", 1, initialPoseCallback);
     broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(node);
-    auto service = node->create_service<slam_interfaces::srv::BackendOpt>("/pgo_service", &pgo_callback);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "pgo service ready!");
 
     //------------------------------------------------------------------------------------------------------

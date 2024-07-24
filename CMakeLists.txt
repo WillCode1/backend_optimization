@@ -62,7 +62,6 @@ if(ROS_EDITION STREQUAL "ROS1")
     pcl_ros
     tf
     eigen_conversions
-    slam_interfaces
   )
 
   include_directories(
@@ -104,7 +103,6 @@ else(ROS_EDITION STREQUAL "ROS2")
   find_package(sensor_msgs REQUIRED)
   find_package(visualization_msgs REQUIRED)
   find_package(tf2_ros REQUIRED)
-  find_package(slam_interfaces REQUIRED)
 
   include_directories(
     ${EIGEN3_INCLUDE_DIR}
@@ -135,7 +133,7 @@ else(ROS_EDITION STREQUAL "ROS2")
     include/global_localization/scancontext/Scancontext.cpp
     include/pgo/Backend.hpp)
   target_link_libraries(pgo stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
-  ament_target_dependencies(pgo rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros slam_interfaces)
+  ament_target_dependencies(pgo rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros)
 
   install(TARGETS pgo
     DESTINATION lib/${PROJECT_NAME}
