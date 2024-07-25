@@ -15,7 +15,7 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include "pgo/Backend.hpp"
-#include "slam_interfaces/BackendOpt.h"
+// #include "slam_interfaces/BackendOpt.h"
 #include "ParametersRos1.h"
 
 FILE *location_log = nullptr;
@@ -32,8 +32,18 @@ ros::Publisher pubOdomAftMapped;
 ros::Publisher pubLidarPath;
 ros::Publisher pubOdomNotFix;
 ros::Publisher pubLoopConstraintEdge;
+ros::Subscriber sub_gnss;
+ros::Publisher pubGlobalmap;
+std::thread visualizeMapThread;
+ros::Subscriber sub_initpose;
+
 std::string map_frame;
 std::string lidar_frame;
+std::string gnss_topic;
+bool save_globalmap_en = false;
+bool save_pgm = false;
+double pgm_resolution;
+float min_z, max_z;
 
 bool flg_exit = false;
 void SigHandle(int sig)
@@ -234,33 +244,11 @@ void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPt
     backend.relocalization->set_init_pose(init_pose);
 }
 
-bool pgo_callback(slam_interfaces::BackendOptRequest &request, slam_interfaces::BackendOptResponse &response)
+bool pgo_callback(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort, PointCloudType::Ptr &submap_fix)
 {
-    PointXYZIRPYT this_pose6d;
-    PointCloudType::Ptr feats_undistort(new PointCloudType());
-    PointCloudType::Ptr submap_fix(new PointCloudType());
-
-    this_pose6d.x = request.pose[0];
-    this_pose6d.y = request.pose[1];
-    this_pose6d.z = request.pose[2];
-    this_pose6d.roll = request.pose[3];
-    this_pose6d.pitch = request.pose[4];
-    this_pose6d.yaw = request.pose[5];
-    this_pose6d.time = request.timestamp;
     publish_odometry(pubOdomAftMapped, this_pose6d, this_pose6d.time);
 
-    pcl::fromROSMsg(request.cloud_undistort, *feats_undistort);
     backend.run(this_pose6d, feats_undistort, submap_fix);
-    if (submap_fix->size())
-    {
-        response.pose_fix.emplace_back(this_pose6d.x);
-        response.pose_fix.emplace_back(this_pose6d.y);
-        response.pose_fix.emplace_back(this_pose6d.z);
-        response.pose_fix.emplace_back(this_pose6d.roll);
-        response.pose_fix.emplace_back(this_pose6d.pitch);
-        response.pose_fix.emplace_back(this_pose6d.yaw);
-        pcl::toROSMsg(*submap_fix, response.submap_fix);
-    }
 
     lidar_end_time = this_pose6d.time;
 
@@ -282,18 +270,8 @@ bool pgo_callback(slam_interfaces::BackendOptRequest &request, slam_interfaces::
     return true;
 }
 
-int main(int argc, char **argv)
+void init_pgo_system(ros::NodeHandle &nh)
 {
-    ros::init(argc, argv, "backend_optimization");
-    ros::NodeHandle nh;
-    string gnss_topic;
-
-    bool save_globalmap_en = false;
-    bool save_pgm = false;
-    double pgm_resolution;
-    float min_z, max_z;
-    // location_log = fopen(DEBUG_FILE_DIR("location.log").c_str(), "a");
-
     ros::param::param("showOptimizedPose", showOptimizedPose, true);
     ros::param::param("globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius, 1000.);
     ros::param::param("globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity, 10.);
@@ -305,21 +283,29 @@ int main(int argc, char **argv)
 
     /*** ROS subscribe initialization ***/
 #ifdef UrbanLoco
-    ros::Subscriber sub_gnss = nh.subscribe(gnss_topic, 200000, UrbanLoco_cbk);
+    sub_gnss = nh.subscribe(gnss_topic, 200000, UrbanLoco_cbk);
 #else
-    ros::Subscriber sub_gnss = nh.subscribe(gnss_topic, 200000, gnss_cbk);
+    sub_gnss = nh.subscribe(gnss_topic, 200000, gnss_cbk);
 #endif
-    // 发布当前正在扫描的点云，topic名字为/cloud_registered
     pubLaserCloudFull = nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered", 100000);
     pubOdomAftMapped = nh.advertise<nav_msgs::Odometry>("/odom_fix", 100000);
     pubLidarPath = nh.advertise<nav_msgs::Path>("/lidar_keyframe_trajectory", 100000);
     pubOdomNotFix = nh.advertise<nav_msgs::Odometry>("/odom_not_fix", 100000);
     pubLoopConstraintEdge = nh.advertise<visualization_msgs::MarkerArray>("/loop_closure_constraints", 1);
 
-    ros::Publisher pubGlobalmap = nh.advertise<sensor_msgs::PointCloud2>("/map_global", 1);
-    std::thread visualizeMapThread = std::thread(&visualize_globalmap_thread, pubGlobalmap);
-    ros::Subscriber sub_initpose = nh.subscribe("/initialpose", 1, initialPoseCallback);
-    ros::ServiceServer server = nh.advertiseService("/pgo_service", pgo_callback);
+    pubGlobalmap = nh.advertise<sensor_msgs::PointCloud2>("/map_global", 1);
+    visualizeMapThread = std::thread(&visualize_globalmap_thread, pubGlobalmap);
+    sub_initpose = nh.subscribe("/initialpose", 1, initialPoseCallback);
+}
+
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "backend_optimization");
+    ros::NodeHandle nh;
+    // location_log = fopen(DEBUG_FILE_DIR("location.log").c_str(), "a");
+
+    init_pgo_system(nh);
+    // ros::ServiceServer server = nh.advertiseService("/pgo_service", pgo_callback);
     ROS_WARN("pgo service ready!");
 
     //------------------------------------------------------------------------------------------------------

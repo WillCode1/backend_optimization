@@ -5,9 +5,6 @@
 #include <pcl/registration/gicp.h>
 #include "Header.h"
 #include "global_localization/scancontext/Scancontext.h"
-#if 0
-#include "utility/manually_correct_loop_closure.h"
-#endif
 
 class LoopClosure
 {
