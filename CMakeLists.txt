@@ -111,6 +111,7 @@ else(ROS_EDITION STREQUAL "ROS2")
     ${PCL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${GTSAM_INCLUDE_DIR}
+    ${pcl_conversions_INCLUDE_DIRS}
     include)
 
   if(BUILD_TESTING)
