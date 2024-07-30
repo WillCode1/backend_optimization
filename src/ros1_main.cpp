@@ -244,7 +244,7 @@ void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPt
     backend.relocalization->set_init_pose(init_pose);
 }
 
-bool pgo_callback(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort, PointCloudType::Ptr &submap_fix)
+void pgo_callback(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort, PointCloudType::Ptr &submap_fix)
 {
     publish_odometry(pubOdomAftMapped, this_pose6d, this_pose6d.time);
 
@@ -267,7 +267,6 @@ bool pgo_callback(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undisto
         //     publish_cloud(pubLaserCloudFull, frontend.feats_down_world, this_pose6d.time, map_frame);
 
     visualize_loop_closure_constraints(pubLoopConstraintEdge, this_pose6d.time, backend.loopClosure->loop_constraint_records, backend.loopClosure->copy_keyframe_pose6d);
-    return true;
 }
 
 void init_pgo_system(ros::NodeHandle &nh)

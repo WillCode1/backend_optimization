@@ -81,7 +81,7 @@ if(ROS_EDITION STREQUAL "ROS1")
 
   add_executable(map_stitch 
     include/global_localization/scancontext/Scancontext.cpp
-    src/map_stitch.cpp)
+    include/map_stitch/map_stitch.cpp)
   target_link_libraries(map_stitch stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam ${catkin_LIBRARIES})
 
   # add_executable(pgo_service src/pgo_service_ros1.cpp)

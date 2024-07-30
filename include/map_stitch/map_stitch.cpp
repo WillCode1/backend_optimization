@@ -5,7 +5,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include "pgo/MapStitch.hpp"
+#include "map_stitch/MapStitch.hpp"
 
 double globalMapVisualizationPoseDensity = 10;
 double globalMapVisualizationLeafSize = 1;
