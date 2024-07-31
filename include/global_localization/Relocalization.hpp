@@ -11,9 +11,9 @@
 #include <pcl/filters/impl/voxel_grid.hpp>
 #include <pcl/kdtree/impl/kdtree_flann.hpp>
 #include "../Header.h"
-#include "pgo/GnssProcessor.hpp"
-#include "global_localization/bnb3d.h"
-#include "global_localization/scancontext/Scancontext.h"
+#include "../pgo/GnssProcessor.hpp"
+#include "bnb3d.h"
+#include "scancontext/Scancontext.h"
 // #define gnss_with_direction
 
 class Relocalization

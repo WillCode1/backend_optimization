@@ -7,7 +7,7 @@
 #include <pcl/octree/octree.h>
 #include <pcl/common/transforms.h>
 #include <omp.h>
-#include "Header.h"
+#include "../Header.h"
 
 
 struct BnbOptions
