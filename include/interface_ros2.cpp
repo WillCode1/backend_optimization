@@ -20,8 +20,8 @@ bool showOptimizedPose = true;
 double globalMapVisualizationSearchRadius = 1000;
 double globalMapVisualizationPoseDensity = 10;
 double globalMapVisualizationLeafSize = 1;
-double lidar_end_time = 0;
-bool path_en = true, scan_pub_en = false, dense_pub_en = false;
+static double lidar_end_time = 0;
+static bool path_en = true, scan_pub_en = false, dense_pub_en = false;
 Backend backend;
 
 rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudFull;
@@ -43,7 +43,7 @@ bool save_pgm = false;
 double pgm_resolution;
 float min_z, max_z;
 
-bool flg_exit = false;
+static bool flg_exit = false;
 void SigHandle(int sig)
 {
     flg_exit = true;

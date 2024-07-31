@@ -22,8 +22,8 @@ bool showOptimizedPose = true;
 double globalMapVisualizationSearchRadius = 1000;
 double globalMapVisualizationPoseDensity = 10;
 double globalMapVisualizationLeafSize = 1;
-double lidar_end_time = 0;
-bool path_en = true, scan_pub_en = false, dense_pub_en = false;
+static double lidar_end_time = 0;
+static bool path_en = true, scan_pub_en = false, dense_pub_en = false;
 Backend backend;
 
 ros::Publisher pubLaserCloudFull;
@@ -44,12 +44,8 @@ bool save_pgm = false;
 double pgm_resolution;
 float min_z, max_z;
 
-bool flg_exit = false;
-void SigHandle(int sig)
-{
-    flg_exit = true;
-    LOG_WARN("catch sig %d", sig);
-}
+static bool flg_exit = false;
+extern void SigHandle(int sig);
 
 void gnss_cbk(const sensor_msgs::NavSatFix::ConstPtr &msg)
 {
