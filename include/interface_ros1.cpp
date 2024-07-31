@@ -243,7 +243,7 @@ void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPt
     backend.relocalization->set_init_pose(init_pose);
 }
 
-void pgo_callback(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort, PointCloudType::Ptr &submap_fix)
+void pgo_handle(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort, PointCloudType::Ptr &submap_fix)
 {
     publish_odometry(pubOdomAftMapped, this_pose6d, this_pose6d.time);
 
