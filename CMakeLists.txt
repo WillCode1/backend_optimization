@@ -84,10 +84,10 @@ if(ROS_EDITION STREQUAL "ROS1")
     include/map_stitch/map_stitch.cpp)
   target_link_libraries(map_stitch stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam ${catkin_LIBRARIES})
 
-  # add_executable(pgo_service src/pgo_service_ros1.cpp)
+  # add_executable(pgo_service include/pgo_service_ros1.cpp)
   # target_link_libraries(pgo_service ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-  add_executable(pgo src/ros1_main.cpp)
+  add_library(pgo include/interface_ros1.cpp)
   target_link_libraries(pgo ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 else(ROS_EDITION STREQUAL "ROS2")
@@ -128,10 +128,10 @@ else(ROS_EDITION STREQUAL "ROS2")
 
   # add_executable(map_stitch 
   #   include/global_localization/scancontext/Scancontext.cpp
-  #   src/map_stitch.cpp)
+  #   include/map_stitch.cpp)
   # target_link_libraries(map_stitch stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
 
-  add_executable(pgo src/ros2_main.cpp
+  add_library(pgo include/interface_ros2.cpp
     include/global_localization/scancontext/Scancontext.cpp
     include/pgo/Backend.hpp)
   target_link_libraries(pgo stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
