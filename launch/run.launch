@@ -13,7 +13,7 @@
     <node pkg="backend_optimization" type="pgo" name="system" output="screen" /> 
 
 	<group if="$(arg rviz)">
-		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find backend_optimization)/rviz_cfg/mapping.rviz" />
+		<node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find backend_optimization)/rviz_cfg/pgo.rviz" />
 	</group>
 
 </launch>
