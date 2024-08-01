@@ -277,10 +277,18 @@ void load_ros_parameters(rclcpp::Node::SharedPtr &node)
     node->declare_parameter("path_en", false);
     node->declare_parameter("scan_publish_en", false);
     node->declare_parameter("dense_publish_en", false);
+    node->declare_parameter("showOptimizedPose", true);
+    node->declare_parameter("globalMapVisualizationSearchRadius", 1000.);
+    node->declare_parameter("globalMapVisualizationPoseDensity", 10.);
+    node->declare_parameter("globalMapVisualizationLeafSize", 1.);
 
     node->get_parameter("path_en", path_en);
     node->get_parameter("scan_publish_en", scan_pub_en);
     node->get_parameter("dense_publish_en", dense_pub_en);
+    node->get_parameter("showOptimizedPose", showOptimizedPose);
+    node->get_parameter("globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius);
+    node->get_parameter("globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity);
+    node->get_parameter("globalMapVisualizationLeafSize", globalMapVisualizationLeafSize);
 
     node->declare_parameter("gnss_topic", "/gps/fix");
     node->declare_parameter("map_frame", "camera_init");
@@ -486,15 +494,6 @@ void load_pgm_parameters(rclcpp::Node::SharedPtr &node)
 
 void init_pgo_system(rclcpp::Node::SharedPtr &node)
 {
-    node->declare_parameter("showOptimizedPose", true);
-    node->declare_parameter("globalMapVisualizationSearchRadius", 1000.);
-    node->declare_parameter("globalMapVisualizationPoseDensity", 10.);
-    node->declare_parameter("globalMapVisualizationLeafSize", 1.);
-    node->get_parameter("showOptimizedPose", showOptimizedPose);
-    node->get_parameter("globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius);
-    node->get_parameter("globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity);
-    node->get_parameter("globalMapVisualizationLeafSize", globalMapVisualizationLeafSize);
-
     load_ros_parameters(node);
     load_parameters(node);
     load_pgm_parameters(node);

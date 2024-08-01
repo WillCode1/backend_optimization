@@ -30,11 +30,6 @@ mapping:
     odom_loop_vaild_period: []
     scancontext_loop_vaild_period: [0, 1]
 
-    # lidar -> imu
-    extrinsic_T: [ -0.011, -0.02329, 0.04412 ]
-    extrinsic_R: [ 1, 0, 0,
-                   0, 1, 0,
-                   0, 0, 1 ]
     # lidar -> gnss
     extrinsic_gnss_T: [ 0, 0, 0 ]
     extrinsic_gnss_R: [ 1, 0, 0, 
@@ -49,6 +44,10 @@ publish:
     path_en:  true
     scan_publish_en:  true       # false: close all the point cloud output
     dense_publish_en: true       # false: low down the points number in a global-frame point clouds scan.
+    showOptimizedPose: true
+    globalMapVisualizationSearchRadius: 1000
+    globalMapVisualizationPoseDensity: 3
+    globalMapVisualizationLeafSize: 0.2
 
 official:
     save_globalmap_en: true
@@ -61,3 +60,4 @@ official:
     pgm_resolution: 0.05
     min_z: 0.0
     max_z: 1.0
+

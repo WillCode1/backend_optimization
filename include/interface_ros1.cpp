@@ -269,6 +269,10 @@ void load_ros_parameters()
     ros::param::param("publish/path_en", path_en, false);
     ros::param::param("publish/scan_publish_en", scan_pub_en, false);
     ros::param::param("publish/dense_publish_en", dense_pub_en, false);
+    ros::param::param("publish/showOptimizedPose", showOptimizedPose, true);
+    ros::param::param("publish/globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius, 1000.);
+    ros::param::param("publish/globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity, 10.);
+    ros::param::param("publish/globalMapVisualizationLeafSize", globalMapVisualizationLeafSize, 1.);
 
     ros::param::param("common/gnss_topic", gnss_topic, std::string("/gps/fix"));
     ros::param::param("common/map_frame", map_frame, std::string("camera_init"));
@@ -402,11 +406,6 @@ void load_pgm_parameters()
 
 void init_pgo_system(ros::NodeHandle &nh)
 {
-    ros::param::param("showOptimizedPose", showOptimizedPose, true);
-    ros::param::param("globalMapVisualizationSearchRadius", globalMapVisualizationSearchRadius, 1000.);
-    ros::param::param("globalMapVisualizationPoseDensity", globalMapVisualizationPoseDensity, 10.);
-    ros::param::param("globalMapVisualizationLeafSize", globalMapVisualizationLeafSize, 1.);
-
     load_ros_parameters();
     load_parameters();
     load_pgm_parameters();
