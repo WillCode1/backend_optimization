@@ -24,20 +24,20 @@ static double lidar_end_time = 0;
 static bool path_en = true, scan_pub_en = false, dense_pub_en = false;
 Backend backend;
 
-rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudFull;
-rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdomAftMapped;
-rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubLidarPath;
-rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdomNotFix;
-rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pubLoopConstraintEdge;
-rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr sub_gnss;
-rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubGlobalmap;
-std::thread visualizeMapThread;
-rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr sub_initpose;
-std::shared_ptr<tf2_ros::TransformBroadcaster> broadcaster;
+static rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubLaserCloudFull;
+static rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdomAftMapped;
+static rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr pubLidarPath;
+static rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pubOdomNotFix;
+static rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr pubLoopConstraintEdge;
+static rclcpp::Publisher<sensor_msgs::msg::NavSatFix>::SharedPtr sub_gnss;
+static rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pubGlobalmap;
+static std::thread visualizeMapThread;
+static rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr sub_initpose;
+static std::shared_ptr<tf2_ros::TransformBroadcaster> broadcaster;
 
-std::string map_frame;
-std::string lidar_frame;
-std::string gnss_topic;
+static std::string map_frame;
+static std::string lidar_frame;
+static std::string gnss_topic;
 bool save_globalmap_en = false;
 bool save_pgm = false;
 double pgm_resolution;
@@ -269,7 +269,7 @@ void pgo_handle(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort
         // else
         //     publish_cloud(pubLaserCloudFull, frontend.feats_down_world, this_pose6d.time, map_frame);
 
-    visualize_loop_closure_constraints(pubLoopConstraintEdge, this_pose6d.time, backend.loopClosure->loop_constraint_records, backend.loopClosure->copy_keyframe_pose6d);
+    visualize_loop_closure_constraints(pubLoopConstraintEdge, this_pose6d.time, backend.loopClosure->loop_constraint_records, backend.keyframe_pose6d_optimized);
 }
 
 void load_ros_parameters(rclcpp::Node::SharedPtr &node)
@@ -500,7 +500,7 @@ void init_pgo_system(rclcpp::Node::SharedPtr &node)
 
     /*** ROS subscribe initialization ***/
     // 发布当前正在扫描的点云，topic名字为/cloud_registered
-    pubLaserCloudFull = node->create_publisher<sensor_msgs::msg::PointCloud2>("/cloud_registered", 1000);
+    pubLaserCloudFull = node->create_publisher<sensor_msgs::msg::PointCloud2>("/lidar_scan", 1000);
     pubOdomAftMapped = node->create_publisher<nav_msgs::msg::Odometry>("/odom_fix", 1000);
     pubLidarPath = node->create_publisher<nav_msgs::msg::Path>("/lidar_keyframe_trajectory", 1000);
     pubOdomNotFix = node->create_publisher<nav_msgs::msg::Odometry>("/odom_not_fix", 1000);

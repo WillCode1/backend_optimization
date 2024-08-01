@@ -26,19 +26,19 @@ static double lidar_end_time = 0;
 static bool path_en = true, scan_pub_en = false, dense_pub_en = false;
 Backend backend;
 
-ros::Publisher pubLaserCloudFull;
-ros::Publisher pubOdomAftMapped;
-ros::Publisher pubLidarPath;
-ros::Publisher pubOdomNotFix;
-ros::Publisher pubLoopConstraintEdge;
-ros::Subscriber sub_gnss;
-ros::Publisher pubGlobalmap;
-std::thread visualizeMapThread;
-ros::Subscriber sub_initpose;
+static ros::Publisher pubLaserCloudFull;
+static ros::Publisher pubOdomAftMapped;
+static ros::Publisher pubLidarPath;
+static ros::Publisher pubOdomNotFix;
+static ros::Publisher pubLoopConstraintEdge;
+static ros::Subscriber sub_gnss;
+static ros::Publisher pubGlobalmap;
+static std::thread visualizeMapThread;
+static ros::Subscriber sub_initpose;
 
-std::string map_frame;
-std::string lidar_frame;
-std::string gnss_topic;
+static std::string map_frame;
+static std::string lidar_frame;
+static std::string gnss_topic;
 bool save_globalmap_en = false;
 bool save_pgm = false;
 double pgm_resolution;
@@ -261,7 +261,7 @@ void pgo_handle(PointXYZIRPYT &this_pose6d, PointCloudType::Ptr &feats_undistort
         // else
         //     publish_cloud(pubLaserCloudFull, frontend.feats_down_world, this_pose6d.time, map_frame);
 
-    visualize_loop_closure_constraints(pubLoopConstraintEdge, this_pose6d.time, backend.loopClosure->loop_constraint_records, backend.loopClosure->copy_keyframe_pose6d);
+    visualize_loop_closure_constraints(pubLoopConstraintEdge, this_pose6d.time, backend.loopClosure->loop_constraint_records, backend.keyframe_pose6d_optimized);
 }
 
 void load_ros_parameters()
@@ -416,7 +416,7 @@ void init_pgo_system(ros::NodeHandle &nh)
 #else
     sub_gnss = nh.subscribe(gnss_topic, 200000, gnss_cbk);
 #endif
-    pubLaserCloudFull = nh.advertise<sensor_msgs::PointCloud2>("/cloud_registered", 100000);
+    pubLaserCloudFull = nh.advertise<sensor_msgs::PointCloud2>("/lidar_scan", 100000);
     pubOdomAftMapped = nh.advertise<nav_msgs::Odometry>("/odom_fix", 100000);
     pubLidarPath = nh.advertise<nav_msgs::Path>("/lidar_keyframe_trajectory", 100000);
     pubOdomNotFix = nh.advertise<nav_msgs::Odometry>("/odom_not_fix", 100000);
