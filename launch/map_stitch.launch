@@ -5,9 +5,6 @@
 
     <rosparam file="$(find backend_optimization)/config/map_stitch.yaml" command="load" />
 
-	<param name="globalMapVisualizationPoseDensity" type="double" value="3" />
-	<param name="globalMapVisualizationLeafSize" type="double" value="0.2" />
-
     <node pkg="backend_optimization" type="map_stitch" name="system" output="screen" /> 
 
 	<group if="$(arg rviz)">
