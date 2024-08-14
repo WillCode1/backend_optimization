@@ -22,5 +22,11 @@ public:
         fflush(pose_trajectory);
     }
 
+    void save_trajectory(const Eigen::Vector3d &pos, const Eigen::Matrix3d &rot, const double &time)
+    {
+        Eigen::Quaterniond quat(rot);
+        save_trajectory(pos, quat, time);
+    }
+
     FILE *pose_trajectory;
 };
