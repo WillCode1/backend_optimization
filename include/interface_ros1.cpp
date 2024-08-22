@@ -16,6 +16,8 @@
 #include <visualization_msgs/MarkerArray.h>
 #include "pgo/Backend.hpp"
 #include "interface_ros1.h"
+// #define UrbanLoco
+// #define liosam
 
 FILE *location_log = nullptr;
 bool showOptimizedPose = true;
@@ -56,10 +58,10 @@ void gnss_cbk(const sensor_msgs::NavSatFix::ConstPtr &msg)
 #ifdef UrbanLoco
 void UrbanLoco_cbk(const nav_msgs::OdometryConstPtr &msg)
 {
-    backend.gnss->UrbanLoco_handler(GnssPose(msg->header.stamp.toSec(),
-                                             V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
-                                             QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z),
-                                             V3D(msg->pose.covariance[21], msg->pose.covariance[28], msg->pose.covariance[35])));
+    backend.gnss->gnss_handler(GnssPose(msg->header.stamp.toSec(),
+                                        V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
+                                        QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z),
+                                        V3D(msg->pose.covariance[21], msg->pose.covariance[28], msg->pose.covariance[35])));
     backend.relocalization->gnss_pose = GnssPose(msg->header.stamp.toSec(),
                                                  V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
                                                  QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z));

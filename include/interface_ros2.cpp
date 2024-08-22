@@ -8,12 +8,13 @@
 #include <nav_msgs/msg/path.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <tf2_ros/transform_broadcaster.h>
-
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include "pgo/Backend.hpp"
 #include "interface_ros2.h"
+// #define UrbanLoco
+// #define liosam
 
 FILE *location_log = nullptr;
 bool showOptimizedPose = true;
@@ -59,10 +60,10 @@ void gnss_cbk(const sensor_msgs::msg::NavSatFix::SharedPtr msg)
 #ifdef UrbanLoco
 void UrbanLoco_cbk(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
-    backend.gnss->UrbanLoco_handler(GnssPose(msg->header.stamp.sec + msg->header.stamp.nanosec * 1.0e-9,
-                                             V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
-                                             QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z),
-                                             V3D(msg->pose.covariance[21], msg->pose.covariance[28], msg->pose.covariance[35])));
+    backend.gnss->gnss_handler(GnssPose(msg->header.stamp.sec + msg->header.stamp.nanosec * 1.0e-9,
+                                        V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
+                                        QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z),
+                                        V3D(msg->pose.covariance[21], msg->pose.covariance[28], msg->pose.covariance[35])));
     backend.relocalization->gnss_pose = GnssPose(msg->header.stamp.sec + msg->header.stamp.nanosec * 1.0e-9,
                                                  V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
                                                  QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z));

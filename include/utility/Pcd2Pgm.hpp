@@ -26,9 +26,11 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ * @ref: https://github.com/ros-planning/navigation/tree/kinetic-devel/map_server/src
  */
 #pragma once
 #include <cstdio>
+#include <fstream>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -114,8 +116,7 @@ public:
       return;
     }
 
-    fprintf(out, "P5\n# CREATOR: Map_generator.cpp %.3f m/pix\n%d %d\n255\n",
-            resolution_, map_info_width, map_info_height);
+    fprintf(out, "P5\n%d %d\n255\n", map_info_width, map_info_height);
 
     for (unsigned int y = 0; y < map_info_height; y++)
     {
@@ -162,6 +163,66 @@ public:
             mapdatafile.c_str(), resolution_, map_info_origin_position_x, map_info_origin_position_y, offset_yaw_);
 
     fclose(yaml);
+    printf("Done\n");
+  }
+
+  void convert_from_pgm()
+  {
+    std::string mapdatafile = save_path_ + ".pgm";
+    FILE *fp = fopen(mapdatafile.c_str(), "rb");
+    if (!fp)
+    {
+      printf("Couldn't read map file from %s\n", mapdatafile.c_str());
+      return;
+    }
+
+    int line = 0;
+    char header[1024] = {0};
+    while (line < 2)
+    {
+      fgets(header, 1024, fp);
+      if (header[0] != '#')
+      {
+        ++line;
+      }
+    }
+    sscanf(header, "%u %u\n", &map_info_width, &map_info_height);
+    fgets(header, 20, fp);
+
+    map_data.resize(map_info_width * map_info_height);
+    map_data.assign(map_info_width * map_info_height, 0);
+
+    for (unsigned int y = 0; y < map_info_height; y++)
+    {
+      for (unsigned int x = 0; x < map_info_width; x++)
+      {
+        unsigned int i = x + (map_info_height - y - 1) * map_info_width;
+        auto tmp = fgetc(fp);
+        if (tmp == 000)
+          map_data[i] = 100;
+      }
+    }
+    fclose(fp);
+    printf("Received a %d X %d map @ %.3f m/pix\n",
+           map_info_width, map_info_height, resolution_);
+
+    char c;
+    std::string format;
+    std::string mapmetadatafile = save_path_ + ".yaml";
+    printf("Reading map occupancy data from %s\n", mapmetadatafile.c_str());
+    std::ifstream file(mapmetadatafile, std::ios::binary);
+    file >> format >> format;
+    file >> format >> resolution_;
+    file >> format >> c >> map_info_origin_position_x >> c >> map_info_origin_position_y >> c >> offset_yaw_ >> c;
+    file.close();
+
+    printf("image: %s\n"
+           "resolution: %f\n"
+           "origin: [%f, %f, %f]\n"
+           "negate: 0\n"
+           "occupied_thresh: 0.65\n"
+           "free_thresh: 0.196\n",
+           mapmetadatafile.c_str(), resolution_, map_info_origin_position_x, map_info_origin_position_y, offset_yaw_);
     printf("Done\n");
   }
 

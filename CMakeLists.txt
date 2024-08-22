@@ -76,6 +76,7 @@ if(ROS_EDITION STREQUAL "ROS1")
 
   add_library(${PROJECT_NAME} SHARED
     include/global_localization/scancontext/Scancontext.cpp
+    include/global_localization/InitCoordinate.cpp
     include/pgo/Backend.hpp)
   target_link_libraries(${PROJECT_NAME} stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
 
@@ -133,6 +134,7 @@ else(ROS_EDITION STREQUAL "ROS2")
 
   add_library(pgo include/interface_ros2.cpp
     include/global_localization/scancontext/Scancontext.cpp
+    include/global_localization/InitCoordinate.cpp
     include/pgo/Backend.hpp)
   target_link_libraries(pgo stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
   ament_target_dependencies(pgo rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros)
