@@ -55,7 +55,6 @@ void gnss_cbk(const sensor_msgs::NavSatFix::ConstPtr &msg)
     backend.relocalization->gnss_pose = GnssPose(msg->header.stamp.toSec(), V3D(msg->latitude, msg->longitude, msg->altitude));
 }
 
-#ifdef UrbanLoco
 void UrbanLoco_cbk(const nav_msgs::OdometryConstPtr &msg)
 {
     backend.gnss->gnss_handler(GnssPose(msg->header.stamp.toSec(),
@@ -66,9 +65,8 @@ void UrbanLoco_cbk(const nav_msgs::OdometryConstPtr &msg)
                                                  V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
                                                  QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z));
 }
-#endif
 
-void publish_cloud(const ros::Publisher &pubCloud, PointCloudType::Ptr cloud, const double& lidar_end_time, const std::string& frame_id)
+void publish_cloud(const ros::Publisher &pubCloud, PointCloudType::Ptr cloud, const double &lidar_end_time, const std::string &frame_id)
 {
     sensor_msgs::PointCloud2 cloud_msg;
     pcl::toROSMsg(*cloud, cloud_msg);
@@ -77,7 +75,7 @@ void publish_cloud(const ros::Publisher &pubCloud, PointCloudType::Ptr cloud, co
     pubCloud.publish(cloud_msg);
 }
 
-void publish_cloud_world(const ros::Publisher &pubLaserCloudFull, PointCloudType::Ptr laserCloud, const PointXYZIRPYT &pose, const double& lidar_end_time)
+void publish_cloud_world(const ros::Publisher &pubLaserCloudFull, PointCloudType::Ptr laserCloud, const PointXYZIRPYT &pose, const double &lidar_end_time)
 {
     PointCloudType::Ptr laserCloudWorld(new PointCloudType(laserCloud->size(), 1));
     pointcloudLidarToWorld(laserCloud, laserCloudWorld, pose);
@@ -97,7 +95,7 @@ void set_posestamp(T &out, const QD &rot, const V3D &pos)
     out.pose.orientation.w = rot.coeffs()[3];
 }
 
-void publish_tf(const geometry_msgs::Pose &pose, const double& lidar_end_time)
+void publish_tf(const geometry_msgs::Pose &pose, const double &lidar_end_time)
 {
     static tf::TransformBroadcaster br;
     tf::Transform transform;
@@ -110,7 +108,7 @@ void publish_tf(const geometry_msgs::Pose &pose, const double& lidar_end_time)
 }
 
 // 发布里程计
-void publish_odometry(const ros::Publisher &pubOdomAftMapped, const PointXYZIRPYT &state, const double& lidar_end_time, bool need_publish_tf = true)
+void publish_odometry(const ros::Publisher &pubOdomAftMapped, const PointXYZIRPYT &state, const double &lidar_end_time, bool need_publish_tf = true)
 {
     nav_msgs::Odometry odomAftMapped;
     odomAftMapped.header.frame_id = map_frame;
@@ -290,9 +288,11 @@ void load_parameters()
 
     ros::param::param("mapping/keyframe_add_dist_threshold", backend.backend->keyframe_add_dist_threshold, 1.f);
     ros::param::param("mapping/keyframe_add_angle_threshold", backend.backend->keyframe_add_angle_threshold, 0.2f);
+    ros::param::param("mapping/numsv", backend.gnss->numsv, 20);
+    ros::param::param("mapping/rtk_age", backend.gnss->rtk_age, 30.f);
+    ros::param::param("mapping/gpsCovThreshold", backend.gnss->gpsCovThreshold, vector<float>());
     ros::param::param("mapping/pose_cov_threshold", backend.backend->pose_cov_threshold, 25.f);
     ros::param::param("mapping/gnssValidInterval", backend.gnss->gnssValidInterval, 0.2f);
-    ros::param::param("mapping/gpsCovThreshold", backend.gnss->gpsCovThreshold, 2.f);
     ros::param::param("mapping/useGpsElevation", backend.gnss->useGpsElevation, false);
 
     ros::param::param("mapping/extrinsic_gnss_T", extrinT, vector<double>());
