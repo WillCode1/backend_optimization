@@ -134,11 +134,6 @@ int main(int argc, char **argv)
     ros::param::param("scan_context/lidar_height", map_stitch.relocalization->sc_manager->LIDAR_HEIGHT, 2.0);
     ros::param::param("scan_context/sc_dist_thres", map_stitch.relocalization->sc_manager->SC_DIST_THRES, 0.5);
 
-    ros::param::param("utm_origin/zone", map_stitch.relocalization->utm_origin.zone, std::string("51N"));
-    ros::param::param("utm_origin/east", map_stitch.relocalization->utm_origin.east, 0.);
-    ros::param::param("utm_origin/north", map_stitch.relocalization->utm_origin.north, 0.);
-    ros::param::param("utm_origin/up", map_stitch.relocalization->utm_origin.up, 0.);
-
     vector<double> extrinT;
     vector<double> extrinR;
     V3D extrinT_eigen;

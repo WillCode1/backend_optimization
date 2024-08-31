@@ -39,14 +39,17 @@ public:
     extrinsic_lidar2gnss.topRightCorner(3, 1) = transl;
   }
 
-  void gnss_handler(const GnssPose &gnss_raw)
+  V3D gnss_global2local(const V3D &gnss_position)
   {
-    GnssPose gps_pose = gnss_raw;
 #ifdef ENU
-    gps_pose.gnss_position = enu_coordinate::Earth::LLH2ENU(gnss_raw.gnss_position, true);
+    return enu_coordinate::Earth::LLH2ENU(gnss_position, true);
 #else
-    gps_pose.gnss_position = utm_coordinate::LLAtoUTM2(gnss_raw.gnss_position);
+    return utm_coordinate::LLAtoUTM2(gnss_position);
 #endif
+  }
+
+  void gnss_handler(const GnssPose &gps_pose)
+  {
     gnss_buffer.push_back(gps_pose);
     // LogAnalysis::save_trajectory(file_pose_gnss, gps_pose.gnss_position, gps_pose.gnss_quat, gps_pose.timestamp);
   }
@@ -116,36 +119,4 @@ public:
   bool useGpsElevation = false;
   deque<GnssPose> gnss_buffer;
   Eigen::Matrix4d extrinsic_lidar2gnss;
-
-private:
-  bool check_mean_and_variance(const std::vector<V3D> &start_point, utm_coordinate::utm_point &utm_origin, const double &variance_thold)
-  {
-    V3D mean = V3D::Zero();
-    V3D variance = V3D::Zero();
-
-    for (const V3D &vec : start_point)
-    {
-      mean += vec;
-    }
-    mean /= start_point.size();
-
-    for (const V3D &vec : start_point)
-    {
-      V3D diff = vec - mean;
-      variance.x() += diff.x() * diff.x();
-      variance.y() += diff.y() * diff.y();
-      variance.z() += diff.z() * diff.z();
-    }
-    variance /= (start_point.size() - 1); // 使用样本方差，除以 (n-1)
-
-    LOG_WARN("check_mean_and_variance. mean = (%.5f, %.5f, %.5f), variance = (%.5f, %.5f, %.5f).", mean.x(), mean.y(), mean.z(), variance.x(), variance.y(), variance.z());
-
-    if (variance.x() > variance_thold || variance.y() > variance_thold || variance.z() > variance_thold)
-      return false;
-
-    utm_origin.east = mean.x();
-    utm_origin.north = mean.y();
-    utm_origin.up = mean.z();
-    return true;
-  }
 };

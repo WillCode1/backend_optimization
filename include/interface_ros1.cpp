@@ -51,18 +51,18 @@ extern void SigHandle(int sig);
 
 void gnss_cbk(const sensor_msgs::NavSatFix::ConstPtr &msg)
 {
-    backend.gnss->gnss_handler(GnssPose(msg->header.stamp.toSec(), V3D(msg->latitude, msg->longitude, msg->altitude)));
-    backend.relocalization->gnss_pose = GnssPose(msg->header.stamp.toSec(), V3D(msg->latitude, msg->longitude, msg->altitude));
+    V3D gnss_position = backend.gnss->gnss_global2local(V3D(RAD2DEG(msg->latitude), RAD2DEG(msg->longitude), msg->altitude));
+    backend.gnss->gnss_handler(GnssPose(msg->header.stamp.toSec(), gnss_position));
+    backend.relocalization->gnss_pose = GnssPose(msg->header.stamp.toSec(), gnss_position);
 }
 
 void UrbanLoco_cbk(const nav_msgs::OdometryConstPtr &msg)
 {
-    backend.gnss->gnss_handler(GnssPose(msg->header.stamp.toSec(),
-                                        V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
+    V3D gnss_position = backend.gnss->gnss_global2local(V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z));
+    backend.gnss->gnss_handler(GnssPose(msg->header.stamp.toSec(), gnss_position,
                                         QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z),
                                         V3D(msg->pose.covariance[21], msg->pose.covariance[28], msg->pose.covariance[35])));
-    backend.relocalization->gnss_pose = GnssPose(msg->header.stamp.toSec(),
-                                                 V3D(msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z),
+    backend.relocalization->gnss_pose = GnssPose(msg->header.stamp.toSec(), gnss_position,
                                                  QD(msg->pose.pose.orientation.w, msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z));
 }
 
@@ -336,11 +336,6 @@ void load_parameters()
 
     if (false)
     {
-        ros::param::param("utm_origin/zone", backend.relocalization->utm_origin.zone, std::string("51N"));
-        ros::param::param("utm_origin/east", backend.relocalization->utm_origin.east, 0.);
-        ros::param::param("utm_origin/north", backend.relocalization->utm_origin.north, 0.);
-        ros::param::param("utm_origin/up", backend.relocalization->utm_origin.up, 0.);
-
         ros::param::param("mapping/extrinsicT_imu2gnss", extrinT, vector<double>());
         ros::param::param("mapping/extrinsicR_imu2gnss", extrinR, vector<double>());
         extrinT_eigen << VEC_FROM_ARRAY(extrinT);
