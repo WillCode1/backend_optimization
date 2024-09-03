@@ -14,7 +14,7 @@
 #include "../pgo/GnssProcessor.hpp"
 #include "bnb3d.h"
 #include "scancontext/Scancontext.h"
-// #define gnss_with_direction
+#define gnss_with_direction
 
 class Relocalization
 {
