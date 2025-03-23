@@ -51,6 +51,12 @@ find_package(PCL 1.8 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS serialization timer thread chrono)
 find_package(GTSAM REQUIRED)
 
+include_directories(
+  ${EIGEN3_INCLUDE_DIR}
+  ${PCL_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${GTSAM_INCLUDE_DIR})
+
 if(ROS_EDITION STREQUAL "ROS1")
   find_package(catkin REQUIRED COMPONENTS
     geometry_msgs
@@ -66,10 +72,6 @@ if(ROS_EDITION STREQUAL "ROS1")
 
   include_directories(
     ${catkin_INCLUDE_DIRS}
-    ${EIGEN3_INCLUDE_DIR}
-    ${PCL_INCLUDE_DIRS}
-    ${Boost_INCLUDE_DIRS}
-    ${GTSAM_INCLUDE_DIR}
     include)
 
   catkin_package()
@@ -107,10 +109,6 @@ else(ROS_EDITION STREQUAL "ROS2")
   find_package(tf2_ros REQUIRED)
 
   include_directories(
-    ${EIGEN3_INCLUDE_DIR}
-    ${PCL_INCLUDE_DIRS}
-    ${Boost_INCLUDE_DIRS}
-    ${GTSAM_INCLUDE_DIR}
     ${pcl_conversions_INCLUDE_DIRS}
     include)
 
