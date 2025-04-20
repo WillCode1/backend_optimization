@@ -310,6 +310,7 @@ void load_parameters(rclcpp::Node::SharedPtr &node)
     node->declare_parameter("keyframe_add_dist_threshold", 1.f);
     node->declare_parameter("keyframe_add_angle_threshold", 0.2f);
     node->declare_parameter("pose_cov_threshold", 25.f);
+    node->declare_parameter("gnss_weight", vector<double>());
     node->declare_parameter("gnssValidInterval", 0.2f);
     node->declare_parameter("gpsCovThreshold", 2.f);
     node->declare_parameter("useGpsElevation", false);
@@ -339,6 +340,7 @@ void load_parameters(rclcpp::Node::SharedPtr &node)
     node->get_parameter("keyframe_add_dist_threshold", backend.backend->keyframe_add_dist_threshold);
     node->get_parameter("keyframe_add_angle_threshold", backend.backend->keyframe_add_angle_threshold);
     node->get_parameter("pose_cov_threshold", backend.backend->pose_cov_threshold);
+    node->get_parameter("gnss_weight", backend.backend->gnss_weight);
     node->get_parameter("gnssValidInterval", backend.gnss->gnssValidInterval);
     node->get_parameter("gpsCovThreshold", backend.gnss->gpsCovThreshold);
     node->get_parameter("useGpsElevation", backend.gnss->useGpsElevation);
