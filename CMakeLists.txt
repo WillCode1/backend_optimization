@@ -50,12 +50,14 @@ find_package(Eigen3 REQUIRED)
 find_package(PCL 1.8 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS serialization timer thread chrono)
 find_package(GTSAM REQUIRED)
+find_package(Pangolin REQUIRED)
 
 include_directories(
   ${EIGEN3_INCLUDE_DIR}
   ${PCL_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  ${GTSAM_INCLUDE_DIR})
+  ${GTSAM_INCLUDE_DIR}
+  ${Pangolin_INCLUDE_DIRS})
 
 if(ROS_EDITION STREQUAL "ROS1")
   find_package(catkin REQUIRED COMPONENTS
@@ -80,12 +82,12 @@ if(ROS_EDITION STREQUAL "ROS1")
     include/global_localization/scancontext/Scancontext.cpp
     include/global_localization/InitCoordinate.cpp
     include/pgo/Backend.hpp)
-  target_link_libraries(${PROJECT_NAME} stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
+  target_link_libraries(${PROJECT_NAME} stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam ${Pangolin_LIBRARIES})
 
   add_executable(map_stitch 
     include/global_localization/scancontext/Scancontext.cpp
     include/map_stitch/map_stitch.cpp)
-  target_link_libraries(map_stitch stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam ${catkin_LIBRARIES})
+  target_link_libraries(map_stitch stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam ${catkin_LIBRARIES} ${Pangolin_LIBRARIES})
 
   # add_executable(pgo_service include/pgo_service_ros1.cpp)
   # target_link_libraries(pgo_service ${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES})
@@ -134,7 +136,7 @@ else(ROS_EDITION STREQUAL "ROS2")
     include/global_localization/scancontext/Scancontext.cpp
     include/global_localization/InitCoordinate.cpp
     include/pgo/Backend.hpp)
-  target_link_libraries(pgo stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam)
+  target_link_libraries(pgo stdc++fs ${PCL_LIBRARIES} ${Boost_LIBRARIES} gtsam ${Pangolin_LIBRARIES})
   ament_target_dependencies(pgo rclcpp sensor_msgs nav_msgs visualization_msgs tf2_ros)
 
   install(TARGETS pgo
